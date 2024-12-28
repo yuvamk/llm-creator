@@ -10,13 +10,12 @@ import {
   Connection,
   Edge,
 } from '@xyflow/react';
-import OpenAI from 'openai';
-import { useToast } from "@/components/ui/use-toast";
 import InputNode from '@/components/nodes/InputNode';
 import LLMNode from '@/components/nodes/LLMNode';
 import OutputNode from '@/components/nodes/OutputNode';
 import Header from '@/components/workflow/Header';
 import Sidebar from '@/components/workflow/Sidebar';
+import { WorkflowExecutor } from '@/components/workflow/WorkflowExecutor';
 import '@xyflow/react/dist/style.css';
 
 const nodeTypes = {
@@ -26,20 +25,16 @@ const nodeTypes = {
 };
 
 const Index = () => {
-  const { toast } = useToast();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const { handleRun } = WorkflowExecutor({ nodes, setNodes, setIsProcessing });
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
     [setEdges],
   );
-
-  const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }, []);
 
   const updateNodeData = (nodeId: string, newData: any) => {
     setNodes((nds) =>
@@ -51,6 +46,11 @@ const Index = () => {
       }),
     );
   };
+
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
@@ -109,63 +109,6 @@ const Index = () => {
     },
     [nodes, setNodes],
   );
-
-  const handleRun = async () => {
-    try {
-      setIsProcessing(true);
-      
-      const inputNode = nodes.find((n) => n.type === 'input');
-      const llmNode = nodes.find((n) => n.type === 'llm');
-      const outputNode = nodes.find((n) => n.type === 'output');
-      
-      if (!inputNode?.data.value) {
-        throw new Error("Please enter an input question");
-      }
-
-      if (!llmNode?.data.apiKey) {
-        throw new Error("Please enter your OpenAI API key");
-      }
-
-      const openai = new OpenAI({
-        apiKey: llmNode.data.apiKey,
-        dangerouslyAllowBrowser: true,
-      });
-
-      const completion = await openai.chat.completions.create({
-        messages: [{ role: "user", content: inputNode.data.value }],
-        model: llmNode.data.model,
-        temperature: llmNode.data.temperature,
-        max_tokens: llmNode.data.maxTokens,
-      });
-
-      const response = completion.choices[0]?.message?.content || "No response generated";
-
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.type === 'output') {
-            return {
-              ...node,
-              data: { ...node.data, value: response },
-            };
-          }
-          return node;
-        }),
-      );
-      
-      toast({
-        title: "Success",
-        description: "Workflow executed successfully",
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   return (
     <div className="flex h-screen">
