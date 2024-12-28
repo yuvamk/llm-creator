@@ -60,6 +60,7 @@
 
 .react-flow__node {
   @apply rounded-lg shadow-lg bg-white border border-gray-200;
+  width: 300px !important;
 }
 
 .react-flow__handle {
@@ -75,7 +76,7 @@
 }
 
 .node-card {
-  @apply bg-white rounded-lg shadow-lg p-4 min-w-[300px];
+  @apply bg-white rounded-lg shadow-lg p-4;
 }
 
 .node-header {
@@ -88,4 +89,10 @@
 
 .node-footer {
   @apply mt-4 flex justify-end;
+}
+
+.react-flow__node-input,
+.react-flow__node-llm,
+.react-flow__node-output {
+  min-width: 300px;
 }
