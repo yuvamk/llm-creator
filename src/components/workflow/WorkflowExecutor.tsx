@@ -73,6 +73,17 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         title: "Error",
         description: errorMessage,
       });
+
+      // Clear output node on error
+      setNodes(nodes.map((node) => {
+        if (node.type === 'output') {
+          return {
+            ...node,
+            data: { ...node.data, value: `Error: ${errorMessage}` },
+          };
+        }
+        return node;
+      }));
     } finally {
       setIsProcessing(false);
     }
