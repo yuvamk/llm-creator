@@ -16,7 +16,7 @@ const OutputNode: React.FC<OutputNodeProps> = ({ data }) => {
         <span>Output</span>
       </div>
       <div className="node-content">
-        <div className="min-h-[100px] p-4 bg-gray-50 rounded-md">
+        <div className="min-h-[100px] p-4 bg-gray-50 rounded-md whitespace-pre-wrap">
           {data.value || "Output will appear here..."}
         </div>
       </div>

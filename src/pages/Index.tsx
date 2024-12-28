@@ -1,4 +1,4 @@
-import React, { useState, useCallback, DragEvent } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
@@ -10,6 +10,7 @@ import {
   Connection,
   Edge,
 } from '@xyflow/react';
+import OpenAI from 'openai';
 import { useToast } from "@/components/ui/use-toast";
 import InputNode from '@/components/nodes/InputNode';
 import LLMNode from '@/components/nodes/LLMNode';
@@ -35,13 +36,24 @@ const Index = () => {
     [setEdges],
   );
 
-  const onDragOver = useCallback((event: DragEvent) => {
+  const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
+  const updateNodeData = (nodeId: string, newData: any) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, data: { ...node.data, ...newData } };
+        }
+        return node;
+      }),
+    );
+  };
+
   const onDrop = useCallback(
-    (event: DragEvent) => {
+    (event: React.DragEvent) => {
       event.preventDefault();
 
       const type = event.dataTransfer.getData('application/reactflow');
@@ -51,18 +63,49 @@ const Index = () => {
       }
 
       const position = {
-        x: event.clientX - 200,  // Adjust for sidebar width
-        y: event.clientY - 64,   // Adjust for header height
+        x: event.clientX - 200,
+        y: event.clientY - 64,
       };
 
-      const newNode = {
-        id: `${type}-${nodes.length + 1}`,
-        type,
-        position,
-        data: { value: '', onChange: () => {} },
-      };
+      let newNode;
+      if (type === 'input') {
+        newNode = {
+          id: `${type}-${nodes.length + 1}`,
+          type,
+          position,
+          data: { 
+            value: '',
+            onChange: (value: string) => updateNodeData(`${type}-${nodes.length + 1}`, { value }),
+          },
+        };
+      } else if (type === 'llm') {
+        newNode = {
+          id: `${type}-${nodes.length + 1}`,
+          type,
+          position,
+          data: {
+            apiKey: '',
+            model: 'gpt-4',
+            temperature: 0.7,
+            maxTokens: 1000,
+            onApiKeyChange: (value: string) => updateNodeData(`${type}-${nodes.length + 1}`, { apiKey: value }),
+            onModelChange: (value: string) => updateNodeData(`${type}-${nodes.length + 1}`, { model: value }),
+            onTemperatureChange: (value: number) => updateNodeData(`${type}-${nodes.length + 1}`, { temperature: value }),
+            onMaxTokensChange: (value: number) => updateNodeData(`${type}-${nodes.length + 1}`, { maxTokens: value }),
+          },
+        };
+      } else if (type === 'output') {
+        newNode = {
+          id: `${type}-${nodes.length + 1}`,
+          type,
+          position,
+          data: { value: '' },
+        };
+      }
 
-      setNodes((nds) => nds.concat(newNode));
+      if (newNode) {
+        setNodes((nds) => nds.concat(newNode));
+      }
     },
     [nodes, setNodes],
   );
@@ -73,6 +116,7 @@ const Index = () => {
       
       const inputNode = nodes.find((n) => n.type === 'input');
       const llmNode = nodes.find((n) => n.type === 'llm');
+      const outputNode = nodes.find((n) => n.type === 'output');
       
       if (!inputNode?.data.value) {
         throw new Error("Please enter an input question");
@@ -82,11 +126,19 @@ const Index = () => {
         throw new Error("Please enter your OpenAI API key");
       }
 
-      const response = await new Promise<string>((resolve) => {
-        setTimeout(() => {
-          resolve(`This is a simulated response to: ${inputNode.data.value}`);
-        }, 1000);
+      const openai = new OpenAI({
+        apiKey: llmNode.data.apiKey,
+        dangerouslyAllowBrowser: true,
       });
+
+      const completion = await openai.chat.completions.create({
+        messages: [{ role: "user", content: inputNode.data.value }],
+        model: llmNode.data.model,
+        temperature: llmNode.data.temperature,
+        max_tokens: llmNode.data.maxTokens,
+      });
+
+      const response = completion.choices[0]?.message?.content || "No response generated";
 
       setNodes((nds) =>
         nds.map((node) => {

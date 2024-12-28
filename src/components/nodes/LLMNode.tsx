@@ -3,6 +3,7 @@ import { Handle, Position } from '@xyflow/react';
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,20 @@ interface LLMNodeProps {
 }
 
 const LLMNode: React.FC<LLMNodeProps> = ({ data }) => {
+  const { toast } = useToast();
+
+  const validateApiKey = (key: string) => {
+    if (!key.startsWith('sk-')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid API Key",
+        description: "OpenAI API key should start with 'sk-'",
+      });
+      return false;
+    }
+    return true;
+  };
+
   return (
     <Card className="node-card">
       <div className="node-header">
@@ -38,7 +53,12 @@ const LLMNode: React.FC<LLMNodeProps> = ({ data }) => {
             type="password"
             placeholder="sk-..."
             value={data.apiKey}
-            onChange={(e) => data.onApiKeyChange(e.target.value)}
+            onChange={(e) => {
+              const key = e.target.value;
+              if (validateApiKey(key)) {
+                data.onApiKeyChange(key);
+              }
+            }}
           />
         </div>
         <div className="space-y-2">
