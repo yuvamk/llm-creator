@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import ReactFlow, {
+import {
+  ReactFlow,
   Background,
   Controls,
   MiniMap,
@@ -16,6 +17,19 @@ import LLMNode from '@/components/nodes/LLMNode';
 import OutputNode from '@/components/nodes/OutputNode';
 import '@xyflow/react/dist/style.css';
 
+type NodeData = {
+  value?: string;
+  onChange?: (value: string) => void;
+  apiKey?: string;
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  onApiKeyChange?: (value: string) => void;
+  onModelChange?: (value: string) => void;
+  onTemperatureChange?: (value: number) => void;
+  onMaxTokensChange?: (value: number) => void;
+}
+
 const nodeTypes = {
   input: InputNode,
   llm: LLMNode,
@@ -27,7 +41,7 @@ const initialNodes = [
     id: 'input-1',
     type: 'input',
     position: { x: 100, y: 100 },
-    data: { value: '', onChange: () => {} },
+    data: { value: '', onChange: () => {} } as NodeData,
   },
   {
     id: 'llm-1',
@@ -42,13 +56,13 @@ const initialNodes = [
       onModelChange: () => {},
       onTemperatureChange: () => {},
       onMaxTokensChange: () => {},
-    },
+    } as NodeData,
   },
   {
     id: 'output-1',
     type: 'output',
     position: { x: 900, y: 100 },
-    data: { value: '' },
+    data: { value: '' } as NodeData,
   },
 ];
 
@@ -63,7 +77,7 @@ const Index = () => {
     [setEdges],
   );
 
-  const updateNodeData = useCallback((nodeId: string, newData: any) => {
+  const updateNodeData = useCallback((nodeId: string, newData: Partial<NodeData>) => {
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === nodeId) {
@@ -81,7 +95,6 @@ const Index = () => {
     try {
       setIsProcessing(true);
       
-      // Find input node and get value
       const inputNode = nodes.find((n) => n.id === 'input-1');
       const llmNode = nodes.find((n) => n.id === 'llm-1');
       
@@ -100,7 +113,6 @@ const Index = () => {
         }, 1000);
       });
 
-      // Update output node
       updateNodeData('output-1', { value: response });
       
       toast({
@@ -118,7 +130,6 @@ const Index = () => {
     }
   };
 
-  // Initialize node data handlers
   React.useEffect(() => {
     const inputHandler = (value: string) => updateNodeData('input-1', { value });
     const apiKeyHandler = (value: string) => updateNodeData('llm-1', { apiKey: value });
