@@ -2,9 +2,21 @@ import { useToast } from "@/components/ui/use-toast";
 import OpenAI from 'openai';
 import { handleOpenAIError } from "@/utils/openai-errors";
 
+interface Node {
+  id: string;
+  type: string;
+  data: {
+    value?: string;
+    apiKey?: string;
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+  };
+}
+
 interface WorkflowExecutorProps {
-  nodes: any[];
-  setNodes: (nodes: any[]) => void;
+  nodes: Node[];
+  setNodes: (nodes: Node[]) => void;
   setIsProcessing: (isProcessing: boolean) => void;
 }
 
@@ -33,24 +45,22 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: inputNode.data.value }],
-        model: llmNode.data.model,
-        temperature: llmNode.data.temperature,
-        max_tokens: llmNode.data.maxTokens,
+        model: llmNode.data.model || 'gpt-3.5-turbo',
+        temperature: llmNode.data.temperature || 0.7,
+        max_tokens: llmNode.data.maxTokens || 1000,
       });
 
       const response = completion.choices[0]?.message?.content || "No response generated";
 
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.type === 'output') {
-            return {
-              ...node,
-              data: { ...node.data, value: response },
-            };
-          }
-          return node;
-        }),
-      );
+      setNodes(nodes.map((node) => {
+        if (node.type === 'output') {
+          return {
+            ...node,
+            data: { ...node.data, value: response },
+          };
+        }
+        return node;
+      }));
       
       toast({
         title: "Success",
