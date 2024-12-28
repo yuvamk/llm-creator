@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/66e84f71-7db1-4632-9359-c2bacd82e018
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
 ## How can I edit this code?
 
@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/66e84f71-7db1-4632-9359-c2bacd82e018) and start prompting.
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 
@@ -52,17 +52,17 @@ npm run dev
 
 ## What technologies are used for this project?
 
-This project is built with .
+This project is built with React, Tailwind CSS, and React Flow to create a visual workflow builder for LLM applications.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- React for the UI components and state management
+- React Flow for the visual workflow canvas
+- Tailwind CSS for styling
+- Shadcn/UI for beautiful, accessible components
+- OpenAI integration for LLM capabilities
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/66e84f71-7db1-4632-9359-c2bacd82e018) and click on Share -> Publish.
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
 ## I want to use a custom domain - is that possible?
 
