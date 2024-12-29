@@ -92,7 +92,20 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         description: "Response generated successfully",
       });
     } catch (error: any) {
-      const errorMessage = handleOpenAIError(error);
+      let errorMessage;
+      
+      if (error.response) {
+        // Try to read the error message from the response only once
+        try {
+          errorMessage = handleOpenAIError(error);
+        } catch (e) {
+          // If we can't read the response, use the error message
+          errorMessage = error.message || "An unexpected error occurred";
+        }
+      } else {
+        errorMessage = error.message || "An unexpected error occurred";
+      }
+
       toast({
         variant: "destructive",
         title: "Error",
