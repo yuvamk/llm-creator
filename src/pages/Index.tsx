@@ -10,11 +10,11 @@ import {
   Connection,
   Edge,
 } from '@xyflow/react';
-import { Send, MessageSquare, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import InputNode from '@/components/nodes/InputNode';
 import LLMNode from '@/components/nodes/LLMNode';
 import OutputNode from '@/components/nodes/OutputNode';
+import Header from '@/components/workflow/Header';
+import Sidebar from '@/components/workflow/Sidebar';
 import { WorkflowExecutor } from '@/components/workflow/WorkflowExecutor';
 import '@xyflow/react/dist/style.css';
 
@@ -24,20 +24,10 @@ const nodeTypes = {
   output: OutputNode,
 };
 
-const ChatHistory = [
-  { id: 1, title: "New Conversation", icon: MessageSquare },
-  { id: 2, title: "Create 10 poems for a scenar..", icon: MessageSquare },
-  { id: 3, title: "Generate a poem on designin..", icon: MessageSquare },
-  { id: 4, title: "Create 5 liner poem", icon: MessageSquare },
-  { id: 5, title: "Create a rich in metaphor po..", icon: MessageSquare },
-];
-
 const Index = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isDeployed, setIsDeployed] = useState(false);
 
   const { handleRun } = WorkflowExecutor({ nodes, setNodes, setIsProcessing });
 
@@ -120,92 +110,11 @@ const Index = () => {
     [nodes, setNodes],
   );
 
-  const handleDeploy = () => {
-    setIsDeployed(true);
-  };
-
-  if (isDeployed) {
-    return (
-      <div className="flex h-screen bg-white">
-        {/* Sidebar */}
-        <div className="w-72 bg-[#F1F0FB] p-4 flex flex-col">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 text-lg">O</span>
-            </div>
-            <span className="text-xl font-semibold">OpenAGI</span>
-          </div>
-          
-          <Button variant="outline" className="mb-6 gap-2">
-            <Plus className="w-4 h-4" />
-            Start new chat
-          </Button>
-
-          <div className="space-y-4">
-            <p className="text-sm text-gray-500 font-medium px-2">CHAT HISTORY</p>
-            {ChatHistory.map((chat) => (
-              <button
-                key={chat.id}
-                className="flex items-center gap-2 w-full px-2 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                <chat.icon className="w-4 h-4 text-blue-500" />
-                <span className="text-sm truncate">{chat.title}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
-          <header className="border-b p-4 flex justify-end items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">✏️</span>
-              <h1 className="text-xl font-semibold">AI Assistant</h1>
-            </div>
-          </header>
-
-          <main className="flex-1 flex flex-col p-8">
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center space-y-4 max-w-2xl">
-                <h2 className="text-2xl font-bold">Ask the AI Assistant Anything</h2>
-                <p className="text-gray-600">
-                  Ask me anything, and I'll do my best to provide you with{" "}
-                  <a href="#" className="text-blue-500">accurate</a>, and{" "}
-                  <a href="#" className="text-blue-500">helpful information</a>, whether you're looking for answers,{" "}
-                  <a href="#" className="text-blue-500">guidance</a>, or just curious about the world around you.
-                </p>
-              </div>
-            </div>
-
-            <div className="border-t pt-4 px-4">
-              <div className="max-w-4xl mx-auto flex gap-2">
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Write your message"
-                  className="flex-1 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-screen">
+      <Sidebar />
       <div className="flex-1 flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center">
-          <Button onClick={handleDeploy}>Deploy</Button>
-          <Button onClick={handleRun} disabled={isProcessing}>
-            Run Workflow
-          </Button>
-        </div>
+        <Header onRun={handleRun} isProcessing={isProcessing} />
         <div className="flex-1 bg-gray-50">
           <ReactFlow
             nodes={nodes}
