@@ -92,18 +92,15 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         description: "Response generated successfully",
       });
     } catch (error: any) {
-      let errorMessage;
-      
-      if (error.response) {
-        // Try to read the error message from the response only once
-        try {
-          errorMessage = handleOpenAIError(error);
-        } catch (e) {
-          // If we can't read the response, use the error message
-          errorMessage = error.message || "An unexpected error occurred";
+      let errorMessage = "An unexpected error occurred";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        // Handle OpenAI API errors
+        if ('error' in error && typeof error.error === 'object' && error.error !== null) {
+          errorMessage = error.error.message || errorMessage;
         }
-      } else {
-        errorMessage = error.message || "An unexpected error occurred";
       }
 
       toast({
