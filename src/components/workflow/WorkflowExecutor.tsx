@@ -41,6 +41,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       const openai = new OpenAI({
         apiKey: llmNode.data.apiKey,
         dangerouslyAllowBrowser: true,
+        baseURL: 'https://api.openai.com/v1'  // Explicitly set the base URL
       });
 
       const completion = await openai.chat.completions.create({
