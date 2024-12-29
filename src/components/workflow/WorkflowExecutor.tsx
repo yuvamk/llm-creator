@@ -1,4 +1,4 @@
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import OpenAI from 'openai';
 import { handleOpenAIError } from "@/utils/openai-errors";
 
@@ -11,6 +11,7 @@ interface Node {
     model?: string;
     temperature?: number;
     maxTokens?: number;
+    isLoading?: boolean;
   };
 }
 
@@ -23,30 +24,53 @@ interface WorkflowExecutorProps {
 export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowExecutorProps) => {
   const { toast } = useToast();
 
+  const setOutputLoading = (isLoading: boolean) => {
+    setNodes(nodes.map((node) => {
+      if (node.type === 'output') {
+        return {
+          ...node,
+          data: { ...node.data, isLoading },
+        };
+      }
+      return node;
+    }));
+  };
+
   const handleRun = async () => {
     try {
-      setIsProcessing(true);
-      
       const inputNode = nodes.find((n) => n.type === 'input');
       const llmNode = nodes.find((n) => n.type === 'llm');
       
-      if (!inputNode?.data.value) {
-        throw new Error("Please enter an input question");
+      if (!inputNode?.data.value?.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Please enter a question",
+        });
+        return;
       }
 
       if (!llmNode?.data.apiKey) {
-        throw new Error("Please enter your OpenAI API key");
+        toast({
+          variant: "destructive",
+          title: "Configuration Error",
+          description: "Please enter your OpenAI API key",
+        });
+        return;
       }
+
+      setIsProcessing(true);
+      setOutputLoading(true);
 
       const openai = new OpenAI({
         apiKey: llmNode.data.apiKey,
         dangerouslyAllowBrowser: true,
-        baseURL: 'https://api.openai.com/v1'  // Explicitly set the base URL
+        baseURL: 'https://api.openai.com/v1'
       });
 
       const completion = await openai.chat.completions.create({
         messages: [{ role: "user", content: inputNode.data.value }],
-        model: llmNode.data.model || 'gpt-3.5-turbo',
+        model: llmNode.data.model || 'gpt-4',
         temperature: llmNode.data.temperature || 0.7,
         max_tokens: llmNode.data.maxTokens || 1000,
       });
@@ -57,7 +81,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         if (node.type === 'output') {
           return {
             ...node,
-            data: { ...node.data, value: response },
+            data: { ...node.data, value: response, isLoading: false },
           };
         }
         return node;
@@ -65,7 +89,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       
       toast({
         title: "Success",
-        description: "Workflow executed successfully",
+        description: "Response generated successfully",
       });
     } catch (error: any) {
       const errorMessage = handleOpenAIError(error);
@@ -75,18 +99,22 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         description: errorMessage,
       });
 
-      // Clear output node on error
       setNodes(nodes.map((node) => {
         if (node.type === 'output') {
           return {
             ...node,
-            data: { ...node.data, value: `Error: ${errorMessage}` },
+            data: { 
+              ...node.data, 
+              value: `Error: ${errorMessage}`,
+              isLoading: false 
+            },
           };
         }
         return node;
       }));
     } finally {
       setIsProcessing(false);
+      setOutputLoading(false);
     }
   };
 

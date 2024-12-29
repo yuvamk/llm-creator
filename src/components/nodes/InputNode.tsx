@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 interface InputNodeProps {
   data: {
@@ -11,6 +12,25 @@ interface InputNodeProps {
 }
 
 const InputNode: React.FC<InputNodeProps> = ({ data }) => {
+  const { toast } = useToast();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    data.onChange(value);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (!data.value.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Please enter a question",
+        });
+      }
+    }
+  };
+
   return (
     <Card className="node-card">
       <div className="node-header">
@@ -21,7 +41,8 @@ const InputNode: React.FC<InputNodeProps> = ({ data }) => {
         <Input
           placeholder="Enter your question..."
           value={data.value}
-          onChange={(e) => data.onChange(e.target.value)}
+          onChange={handleInputChange}
+          onKeyPress={handleKeyPress}
         />
       </div>
       <Handle type="source" position={Position.Right} />

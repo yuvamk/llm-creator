@@ -1,10 +1,12 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 interface OutputNodeProps {
   data: {
     value: string;
+    isLoading?: boolean;
   };
 }
 
@@ -17,7 +19,14 @@ const OutputNode: React.FC<OutputNodeProps> = ({ data }) => {
       </div>
       <div className="node-content">
         <div className="min-h-[100px] p-4 bg-gray-50 rounded-md whitespace-pre-wrap">
-          {data.value || "Output will appear here..."}
+          {data.isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <span className="ml-2">Processing...</span>
+            </div>
+          ) : (
+            data.value || "Output will appear here..."
+          )}
         </div>
       </div>
       <Handle type="target" position={Position.Left} />
