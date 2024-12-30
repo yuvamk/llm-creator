@@ -1,5 +1,6 @@
 import { useToast } from "@/hooks/use-toast";
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { handleOpenAIError } from "@/utils/openai-errors";
 
 interface Node {
@@ -8,6 +9,7 @@ interface Node {
   data: {
     value?: string;
     apiKey?: string;
+    provider?: string;
     model?: string;
     temperature?: number;
     maxTokens?: number;
@@ -54,7 +56,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         toast({
           variant: "destructive",
           title: "Configuration Error",
-          description: "Please enter your OpenAI API key",
+          description: "Please enter your API key",
         });
         return;
       }
@@ -62,20 +64,32 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       setIsProcessing(true);
       setOutputLoading(true);
 
-      const openai = new OpenAI({
-        apiKey: llmNode.data.apiKey,
-        dangerouslyAllowBrowser: true,
-        baseURL: 'https://api.openai.com/v1'
-      });
+      let response = '';
 
-      const completion = await openai.chat.completions.create({
-        messages: [{ role: "user", content: inputNode.data.value }],
-        model: llmNode.data.model || 'gpt-4',
-        temperature: llmNode.data.temperature || 0.7,
-        max_tokens: llmNode.data.maxTokens || 1000,
-      });
+      if (llmNode.data.provider === 'openai') {
+        const openai = new OpenAI({
+          apiKey: llmNode.data.apiKey,
+          dangerouslyAllowBrowser: true,
+          baseURL: 'https://api.openai.com/v1'
+        });
 
-      const response = completion.choices[0]?.message?.content || "No response generated";
+        const completion = await openai.chat.completions.create({
+          messages: [{ role: "user", content: inputNode.data.value }],
+          model: llmNode.data.model || 'gpt-4',
+          temperature: llmNode.data.temperature || 0.7,
+          max_tokens: llmNode.data.maxTokens || 1000,
+        });
+
+        response = completion.choices[0]?.message?.content || "No response generated";
+      } else {
+        // Gemini API
+        const genAI = new GoogleGenerativeAI(llmNode.data.apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+        const result = await model.generateContent(inputNode.data.value);
+        const text = result.response.text();
+        response = text;
+      }
 
       setNodes(nodes.map((node) => {
         if (node.type === 'output') {
@@ -97,7 +111,6 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'object' && error !== null) {
-        // Handle OpenAI API errors
         if ('error' in error && typeof error.error === 'object' && error.error !== null) {
           errorMessage = error.error.message || errorMessage;
         }

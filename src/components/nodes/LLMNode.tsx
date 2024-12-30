@@ -11,15 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface LLMNodeProps {
   data: {
     apiKey: string;
     model: string;
+    provider: string;
     temperature: number;
     maxTokens: number;
     onApiKeyChange: (value: string) => void;
     onModelChange: (value: string) => void;
+    onProviderChange: (value: string) => void;
     onTemperatureChange: (value: number) => void;
     onMaxTokensChange: (value: number) => void;
   };
@@ -28,8 +31,8 @@ interface LLMNodeProps {
 const LLMNode: React.FC<LLMNodeProps> = ({ data }) => {
   const { toast } = useToast();
 
-  const validateApiKey = (key: string) => {
-    if (!key.startsWith('sk-')) {
+  const validateApiKey = (key: string, provider: string) => {
+    if (provider === 'openai' && !key.startsWith('sk-')) {
       toast({
         variant: "destructive",
         title: "Invalid API Key",
@@ -47,50 +50,75 @@ const LLMNode: React.FC<LLMNodeProps> = ({ data }) => {
         <span>LLM Engine</span>
       </div>
       <div className="node-content">
-        <div className="space-y-2">
-          <Label>OpenAI API Key</Label>
-          <Input
-            type="password"
-            placeholder="sk-..."
-            value={data.apiKey}
-            onChange={(e) => {
-              const key = e.target.value;
-              if (validateApiKey(key)) {
-                data.onApiKeyChange(key);
-              }
-            }}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Model</Label>
-          <Select value={data.model} onValueChange={data.onModelChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select model" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="gpt-4">GPT-4</SelectItem>
-              <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>Temperature ({data.temperature})</Label>
-          <Input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={data.temperature}
-            onChange={(e) => data.onTemperatureChange(parseFloat(e.target.value))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Max Tokens</Label>
-          <Input
-            type="number"
-            value={data.maxTokens}
-            onChange={(e) => data.onMaxTokensChange(parseInt(e.target.value))}
-          />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Provider</Label>
+            <RadioGroup
+              value={data.provider}
+              onValueChange={data.onProviderChange}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="openai" id="openai" />
+                <Label htmlFor="openai">ChatGPT</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="gemini" id="gemini" />
+                <Label htmlFor="gemini">Gemini</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <div className="space-y-2">
+            <Label>API Key</Label>
+            <Input
+              type="password"
+              placeholder={data.provider === 'openai' ? "sk-..." : "Enter Gemini API key"}
+              value={data.apiKey}
+              onChange={(e) => {
+                const key = e.target.value;
+                if (validateApiKey(key, data.provider)) {
+                  data.onApiKeyChange(key);
+                }
+              }}
+            />
+          </div>
+
+          {data.provider === 'openai' && (
+            <div className="space-y-2">
+              <Label>Model</Label>
+              <Select value={data.model} onValueChange={data.onModelChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-4">GPT-4</SelectItem>
+                  <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label>Temperature ({data.temperature})</Label>
+            <Input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={data.temperature}
+              onChange={(e) => data.onTemperatureChange(parseFloat(e.target.value))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Max Tokens</Label>
+            <Input
+              type="number"
+              value={data.maxTokens}
+              onChange={(e) => data.onMaxTokensChange(parseInt(e.target.value))}
+            />
+          </div>
         </div>
       </div>
       <Handle type="target" position={Position.Left} />
