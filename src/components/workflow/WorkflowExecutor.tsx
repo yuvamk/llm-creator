@@ -1,7 +1,6 @@
 import { useToast } from "@/hooks/use-toast";
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { handleOpenAIError } from "@/utils/openai-errors";
 
 interface Node {
   id: string;
@@ -38,6 +37,22 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
     }));
   };
 
+  const updateOutput = (response: string) => {
+    setNodes(nodes.map((node) => {
+      if (node.type === 'output') {
+        return {
+          ...node,
+          data: { 
+            ...node.data, 
+            value: response,
+            isLoading: false 
+          },
+        };
+      }
+      return node;
+    }));
+  };
+
   const handleRun = async () => {
     try {
       const inputNode = nodes.find((n) => n.type === 'input');
@@ -64,13 +79,12 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       setIsProcessing(true);
       setOutputLoading(true);
 
-      let response = '';
+      let response: string;
 
       if (llmNode.data.provider === 'openai') {
         const openai = new OpenAI({
           apiKey: llmNode.data.apiKey,
           dangerouslyAllowBrowser: true,
-          baseURL: 'https://api.openai.com/v1'
         });
 
         const completion = await openai.chat.completions.create({
@@ -87,54 +101,27 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const result = await model.generateContent(inputNode.data.value);
-        const text = result.response.text();
-        response = text;
+        response = result.response.text();
       }
 
-      setNodes(nodes.map((node) => {
-        if (node.type === 'output') {
-          return {
-            ...node,
-            data: { ...node.data, value: response, isLoading: false },
-          };
-        }
-        return node;
-      }));
+      updateOutput(response);
       
       toast({
         title: "Success",
         description: "Response generated successfully",
       });
     } catch (error: any) {
-      let errorMessage = "An unexpected error occurred";
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
-        if ('error' in error && typeof error.error === 'object' && error.error !== null) {
-          errorMessage = error.error.message || errorMessage;
-        }
-      }
-
+      console.error('API Error:', error);
+      
+      const errorMessage = error?.message || "An unexpected error occurred";
+      
+      updateOutput(`Error: ${errorMessage}`);
+      
       toast({
         variant: "destructive",
         title: "Error",
         description: errorMessage,
       });
-
-      setNodes(nodes.map((node) => {
-        if (node.type === 'output') {
-          return {
-            ...node,
-            data: { 
-              ...node.data, 
-              value: `Error: ${errorMessage}`,
-              isLoading: false 
-            },
-          };
-        }
-        return node;
-      }));
     } finally {
       setIsProcessing(false);
       setOutputLoading(false);
