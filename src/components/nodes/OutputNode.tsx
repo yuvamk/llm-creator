@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface OutputNodeProps {
   data: {
@@ -18,16 +19,20 @@ const OutputNode: React.FC<OutputNodeProps> = ({ data }) => {
         <span>Output</span>
       </div>
       <div className="node-content">
-        <div className="min-h-[100px] p-4 bg-gray-50 rounded-md whitespace-pre-wrap">
+        <ScrollArea className="h-[300px] w-full rounded-md border p-4">
           {data.isLoading ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
               <span className="ml-2">Processing...</span>
             </div>
           ) : (
-            data.value || "Output will appear here..."
+            <div className="space-y-4">
+              <div className="text-sm text-gray-700 whitespace-pre-wrap font-medium">
+                {data.value || "Output will appear here..."}
+              </div>
+            </div>
           )}
-        </div>
+        </ScrollArea>
       </div>
       <Handle type="target" position={Position.Left} />
     </Card>
