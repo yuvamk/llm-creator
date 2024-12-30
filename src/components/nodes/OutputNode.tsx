@@ -28,7 +28,7 @@ const OutputNode: React.FC<OutputNodeProps> = ({ data }) => {
           ) : (
             <div className="space-y-4">
               <div className="text-sm text-gray-700 whitespace-pre-wrap font-medium">
-                {data.value || "Output will appear here..."}
+                {data.value || "Waiting for input..."}
               </div>
             </div>
           )}

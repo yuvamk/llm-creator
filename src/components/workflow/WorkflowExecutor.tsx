@@ -37,14 +37,15 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
     }));
   };
 
-  const updateOutput = (response: string) => {
+  const updateOutput = (response: string, provider: string) => {
+    const formattedResponse = `Generated Output (via ${provider}):\n\n${response}`;
     setNodes(nodes.map((node) => {
       if (node.type === 'output') {
         return {
           ...node,
           data: { 
             ...node.data, 
-            value: response,
+            value: formattedResponse,
             isLoading: false 
           },
         };
@@ -80,8 +81,9 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       setOutputLoading(true);
 
       let response: string;
+      const provider = llmNode.data.provider || 'openai';
 
-      if (llmNode.data.provider === 'openai') {
+      if (provider === 'openai') {
         const openai = new OpenAI({
           apiKey: llmNode.data.apiKey,
           dangerouslyAllowBrowser: true,
@@ -104,7 +106,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         response = result.response.text();
       }
 
-      updateOutput(response);
+      updateOutput(response, provider);
       
       toast({
         title: "Success",
@@ -115,7 +117,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       
       const errorMessage = error?.message || "An unexpected error occurred";
       
-      updateOutput(`Error: ${errorMessage}`);
+      updateOutput(`Error: ${errorMessage}`, llmNode?.data.provider || 'openai');
       
       toast({
         variant: "destructive",
