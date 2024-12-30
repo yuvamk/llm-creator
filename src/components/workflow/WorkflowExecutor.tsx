@@ -55,10 +55,10 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
   };
 
   const handleRun = async () => {
+    const inputNode = nodes.find((n) => n.type === 'input');
+    const llmNode = nodes.find((n) => n.type === 'llm');
+    
     try {
-      const inputNode = nodes.find((n) => n.type === 'input');
-      const llmNode = nodes.find((n) => n.type === 'llm');
-      
       if (!inputNode?.data.value?.trim()) {
         toast({
           variant: "destructive",
@@ -116,8 +116,9 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       console.error('API Error:', error);
       
       const errorMessage = error?.message || "An unexpected error occurred";
+      const currentProvider = llmNode?.data.provider || 'openai';
       
-      updateOutput(`Error: ${errorMessage}`, llmNode?.data.provider || 'openai');
+      updateOutput(`Error: ${errorMessage}`, currentProvider);
       
       toast({
         variant: "destructive",
