@@ -3,15 +3,9 @@ import { Handle, Position } from '@xyflow/react';
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import ModelSelector from './llm/ModelSelector';
+import ProviderSelector from './llm/ProviderSelector';
+import ApiKeyInput from './llm/ApiKeyInput';
 
 interface LLMNodeProps {
   data: {
@@ -29,20 +23,6 @@ interface LLMNodeProps {
 }
 
 const LLMNode: React.FC<LLMNodeProps> = ({ data }) => {
-  const { toast } = useToast();
-
-  const validateApiKey = (key: string, provider: string) => {
-    if (provider === 'openai' && !key.startsWith('sk-')) {
-      toast({
-        variant: "destructive",
-        title: "Invalid API Key",
-        description: "OpenAI API key should start with 'sk-'",
-      });
-      return false;
-    }
-    return true;
-  };
-
   return (
     <Card className="node-card">
       <div className="node-header">
@@ -51,52 +31,22 @@ const LLMNode: React.FC<LLMNodeProps> = ({ data }) => {
       </div>
       <div className="node-content">
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Provider</Label>
-            <RadioGroup
-              value={data.provider}
-              onValueChange={data.onProviderChange}
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="openai" id="openai" />
-                <Label htmlFor="openai">ChatGPT</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="gemini" id="gemini" />
-                <Label htmlFor="gemini">Gemini</Label>
-              </div>
-            </RadioGroup>
-          </div>
+          <ProviderSelector 
+            provider={data.provider}
+            onProviderChange={data.onProviderChange}
+          />
 
-          <div className="space-y-2">
-            <Label>API Key</Label>
-            <Input
-              type="password"
-              placeholder={data.provider === 'openai' ? "sk-..." : "Enter Gemini API key"}
-              value={data.apiKey}
-              onChange={(e) => {
-                const key = e.target.value;
-                if (validateApiKey(key, data.provider)) {
-                  data.onApiKeyChange(key);
-                }
-              }}
-            />
-          </div>
+          <ApiKeyInput
+            apiKey={data.apiKey}
+            provider={data.provider}
+            onApiKeyChange={data.onApiKeyChange}
+          />
 
           {data.provider === 'openai' && (
-            <div className="space-y-2">
-              <Label>Model</Label>
-              <Select value={data.model} onValueChange={data.onModelChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="gpt-4o">GPT-4 (Best Results)</SelectItem>
-                  <SelectItem value="gpt-4o-mini">GPT-4 Mini (Fastest)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <ModelSelector
+              model={data.model}
+              onModelChange={data.onModelChange}
+            />
           )}
 
           <div className="space-y-2">
