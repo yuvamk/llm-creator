@@ -120,6 +120,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       let responseText: string;
 
       if (provider === 'openai') {
+        // OpenAI API endpoint is handled by the OpenAI client
         const openai = new OpenAI({
           apiKey: llmNode.data.apiKey,
           dangerouslyAllowBrowser: true,
@@ -134,8 +135,9 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
 
         responseText = completion.choices[0]?.message?.content || "No response generated";
       } else {
-        // Gemini API
+        // Gemini API endpoint is handled by the GoogleGenerativeAI client
         const genAI = new GoogleGenerativeAI(llmNode.data.apiKey);
+        // Using the correct model name for Gemini
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const result = await model.generateContent(inputNode.data.value);
