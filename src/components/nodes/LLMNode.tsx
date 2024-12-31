@@ -92,8 +92,8 @@ const LLMNode: React.FC<LLMNodeProps> = ({ data }) => {
                   <SelectValue placeholder="Select model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gpt-4">GPT-4</SelectItem>
-                  <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                  <SelectItem value="gpt-4o">GPT-4 (Best Results)</SelectItem>
+                  <SelectItem value="gpt-4o-mini">GPT-4 Mini (Fastest)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

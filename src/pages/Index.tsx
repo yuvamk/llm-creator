@@ -85,11 +85,13 @@ const Index = () => {
           position,
           data: {
             apiKey: '',
-            model: 'gpt-4',
+            model: 'gpt-4o',  // Updated default model
+            provider: 'openai',
             temperature: 0.7,
             maxTokens: 1000,
             onApiKeyChange: (value: string) => updateNodeData(`${type}-${nodes.length + 1}`, { apiKey: value }),
             onModelChange: (value: string) => updateNodeData(`${type}-${nodes.length + 1}`, { model: value }),
+            onProviderChange: (value: string) => updateNodeData(`${type}-${nodes.length + 1}`, { provider: value }),
             onTemperatureChange: (value: number) => updateNodeData(`${type}-${nodes.length + 1}`, { temperature: value }),
             onMaxTokensChange: (value: number) => updateNodeData(`${type}-${nodes.length + 1}`, { maxTokens: value }),
           },
