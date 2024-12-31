@@ -85,7 +85,7 @@ const Index = () => {
           position,
           data: {
             apiKey: '',
-            model: 'gpt-4o',  // Updated default model
+            model: 'gpt-3.5-turbo',  // Updated default model
             provider: 'openai',
             temperature: 0.7,
             maxTokens: 1000,
