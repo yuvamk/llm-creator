@@ -80,7 +80,7 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
       setIsProcessing(true);
       setOutputLoading(true);
 
-      let response: string;
+      let responseText: string;
       const provider = llmNode.data.provider || 'openai';
 
       if (provider === 'openai') {
@@ -96,17 +96,18 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
           max_tokens: llmNode.data.maxTokens || 1000,
         });
 
-        response = completion.choices[0]?.message?.content || "No response generated";
+        responseText = completion.choices[0]?.message?.content || "No response generated";
       } else {
         // Gemini API
         const genAI = new GoogleGenerativeAI(llmNode.data.apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
         const result = await model.generateContent(inputNode.data.value);
-        response = result.response.text();
+        const response = await result.response;
+        responseText = response.text();
       }
 
-      updateOutput(response, provider);
+      updateOutput(responseText, provider);
       
       toast({
         title: "Success",
