@@ -54,6 +54,37 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
     }));
   };
 
+  const validateApiKey = (apiKey: string, provider: string): boolean => {
+    if (!apiKey) {
+      toast({
+        variant: "destructive",
+        title: "Configuration Error",
+        description: "Please enter your API key",
+      });
+      return false;
+    }
+
+    if (provider === 'openai' && !apiKey.startsWith('sk-')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid API Key",
+        description: "OpenAI API key should start with 'sk-'. Please check your API key.",
+      });
+      return false;
+    }
+
+    if (provider === 'gemini' && apiKey.startsWith('sk-')) {
+      toast({
+        variant: "destructive",
+        title: "Invalid API Key",
+        description: "You're using an OpenAI API key with Gemini. Please provide a valid Gemini API key.",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleRun = async () => {
     const inputNode = nodes.find((n) => n.type === 'input');
     const llmNode = nodes.find((n) => n.type === 'llm');
@@ -77,11 +108,16 @@ export const WorkflowExecutor = ({ nodes, setNodes, setIsProcessing }: WorkflowE
         return;
       }
 
+      const provider = llmNode.data.provider || 'openai';
+      
+      if (!validateApiKey(llmNode.data.apiKey, provider)) {
+        return;
+      }
+
       setIsProcessing(true);
       setOutputLoading(true);
 
       let responseText: string;
-      const provider = llmNode.data.provider || 'openai';
 
       if (provider === 'openai') {
         const openai = new OpenAI({
