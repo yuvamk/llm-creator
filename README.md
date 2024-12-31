@@ -1,69 +1,157 @@
-# Welcome to your Lovable project
+# OpenAGI - Visual LLM Workflow Builder
 
-## Project info
+A React-based visual workflow builder for creating and managing LLM (Language Learning Model) applications. This project allows users to create workflows by connecting different nodes (Input, LLM Engine, Output) and interact with various AI models including OpenAI's GPT and Google's Gemini.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- Visual workflow builder with drag-and-drop interface
+- Support for multiple LLM providers (OpenAI and Gemini)
+- Real-time preview of workflow outputs
+- Customizable node configurations
+- Responsive design
 
-There are several ways of editing your application.
+## Technologies Used
 
-**Use Lovable**
+- **React** - Frontend framework
+- **Vite** - Build tool and development server
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first CSS framework
+- **Shadcn/UI** - React components library
+- **React Flow** (@xyflow/react) - Flow visualization library
+- **OpenAI & Gemini APIs** - LLM providers
+- **React Query** (@tanstack/react-query) - Data fetching and state management
+- **Lucide React** - Icon library
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Project Structure
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/
+│   ├── nodes/           # Flow nodes components
+│   │   ├── InputNode.tsx
+│   │   ├── LLMNode.tsx
+│   │   ├── OutputNode.tsx
+│   │   └── llm/        # LLM node subcomponents
+│   │       ├── ApiKeyInput.tsx
+│   │       ├── ModelSelector.tsx
+│   │       └── ProviderSelector.tsx
+│   └── workflow/        # Workflow-related components
+│       ├── Header.tsx
+│       ├── Sidebar.tsx
+│       └── WorkflowExecutor.tsx
+├── services/
+│   └── api-service.ts   # API integration service
+├── utils/
+│   ├── openai-errors.ts # OpenAI error handling
+│   └── workflow-utils.ts # Workflow utility functions
+└── pages/
+    └── Index.tsx        # Main application page
 ```
 
-**Edit a file directly in GitHub**
+## Component Details
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Node Components
 
-**Use GitHub Codespaces**
+1. **InputNode**
+   - Handles user input text
+   - Validates input before processing
+   - Provides real-time feedback
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+2. **LLMNode**
+   - Configures LLM settings (model, temperature, tokens)
+   - Manages API keys for different providers
+   - Handles provider selection (OpenAI/Gemini)
 
-## What technologies are used for this project?
+3. **OutputNode**
+   - Displays LLM responses
+   - Shows loading states
+   - Handles error messages
 
-This project is built with React, Tailwind CSS, and React Flow to create a visual workflow builder for LLM applications.
+### Workflow Components
 
-- React for the UI components and state management
-- React Flow for the visual workflow canvas
-- Tailwind CSS for styling
-- Shadcn/UI for beautiful, accessible components
-- OpenAI integration for LLM capabilities
+1. **Header**
+   - Project navigation
+   - Workflow execution controls
+   - Deployment options
 
-## How can I deploy this project?
+2. **Sidebar**
+   - Node type selection
+   - Drag-and-drop functionality
+   - Component organization
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+3. **WorkflowExecutor**
+   - Manages workflow execution
+   - Handles API calls
+   - Updates node states
 
-## I want to use a custom domain - is that possible?
+## Getting Started
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn package manager
+- OpenAI API key (for ChatGPT)
+- Gemini API key (for Google's Gemini)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd openagi
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Create a `.env` file in the root directory:
+```env
+VITE_OPENAI_API_KEY=your_openai_api_key
+VITE_GEMINI_API_KEY=your_gemini_api_key
+```
+
+4. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+The application will be available at `http://localhost:8080`
+
+### Building for Production
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+## Usage
+
+1. Drag nodes from the sidebar onto the canvas
+2. Connect nodes by dragging from one handle to another
+3. Configure the LLM node with your API key and preferences
+4. Enter your prompt in the input node
+5. Click "Run" to execute the workflow
+
+## Error Handling
+
+The application includes comprehensive error handling for:
+- API quota exceeded
+- Invalid API keys
+- Model availability
+- Network issues
+- Input validation
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
